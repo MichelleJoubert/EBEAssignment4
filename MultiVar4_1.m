@@ -1,8 +1,8 @@
-function [Done] = MultiVar4_1(Diameter,I)
+function [Done] = MultiVar4_1(Diameter,I,Idur)
 %   This function simulates the propagation of an action potential along   
 %   nerve fibre of two different diameters.
 %
-%   MultiVar4_1(Diameter,I) function simulates the Hodgkin-Huxley model 
+%   MultiVar4_1(Diameter,I,Idur) function simulates the Hodgkin-Huxley model 
 %   for the squid giant axon constants and user specified values of the 
 %   fibre diameter in cm. As output it plots voltage (membrane potential)   
 %   time series for each of the various fibre diameters.
@@ -12,9 +12,10 @@ function [Done] = MultiVar4_1(Diameter,I)
 %   Idur is the duration of stimulation application (in msec)
 %
 %   Example:
-%   MultiVar4_1([0.01],1)
-%   MultiVar4_1([0.01],0.33)
-%   MultiVar4_1([0.01,0.02,0.005],1)
+%   MultiVar4_1([0.01],0.5,1) for single pulse
+%   MultiVar4_1([0.02,0.01,0.005],0.5,1) for single pulse for multiple
+%   fibre diameters
+%   MultiVar4_1([0.01],0.5,2) for constant pulse
 %
 %%	Simulation timing variables
     t = 0;
@@ -27,7 +28,7 @@ function [Done] = MultiVar4_1(Diameter,I)
     x = 0;
     xloop = 0;
     dx = 0.05;
-    xspan = 10;
+    xspan = 5;
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
@@ -35,16 +36,16 @@ function [Done] = MultiVar4_1(Diameter,I)
 %%  Running through the various input diameters 
     for i=1:length(Diameter)
         Diameter1 = Diameter(i);
-        [data,t,m,h,n,Ispan] = HHsim(Diameter1,I,t,x,loop,xloop,dx);
+        [data,t] = HHsim(Diameter1,I,Idur,t,x,loop,xloop,dx);
         dataholder{1,i} = data;
     end
     
 %%  Plots of membrane potential for various input diameters   
     for i=1:length(Diameter)
         figure
-        x = dataholder{1,i};
-        for n = 2:5:xloop
-            plot(t,x(n,:)+(n*15),'b');
+        k = dataholder{1,i};
+        for n = 2:2:xloop-1
+            plot(t,k(n,:)+(n*15),'b');
             hold on
         end
         xlabel('Time (msec)');
@@ -67,9 +68,8 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,m,h,n,Ispan] = HHsim(defDiameter,defI,t,x,loop,xloop,dx)    
+function [v,t] = HHsim(defDiameter,defI,Idur,t,x,loop,xloop,dx)    
     defTemp = 6.3;              % environmental temperature (in deg Celsius)
-    PulsePos = [1];             % PulsePos is a vector dictating the start time in msec of each successive pulse, eg. [1,17,26,40]
     dt = 0.001;                 % time steps for simulation
     
 %%	Constants and intial values for squid giant axon  
@@ -110,8 +110,11 @@ function [v,t,m,h,n,Ispan] = HHsim(defDiameter,defI,t,x,loop,xloop,dx)
    
 %%	Ispan is the applied current vector to hold all instances of the external 
     p = xloop/2;
-    Ispan(p,3000:4000) = defI;
-%     Ispan(p,:) = defI;
+    if Idur == 1
+        Ispan(p,3000:4000) = defI;
+    elseif Idur == 2
+        Ispan(p,:) = defI;
+    end
 
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);

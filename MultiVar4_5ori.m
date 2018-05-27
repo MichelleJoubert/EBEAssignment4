@@ -1,4 +1,4 @@
-function [Done] = MultiVar4_5b(Distance, I)
+function [Done] = MultiVar4_5ori(Distance, I)
 %   This function simulates the propagation of an action potential along   
 %   nerve fibre of various distances away from the nerve fibre stimulated by    
 %	a single anodic or cathodic monophasic stimulation pulse, modelled by the 

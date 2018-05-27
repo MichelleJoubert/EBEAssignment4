@@ -15,19 +15,19 @@ function [Done] = MultiVar4_3(Distance,I)
 %   
 %   Example:
 %   MultiVar4_3([0.05],-5) for cathodic stimulation
-%   MultiVar4_3([0.05,5) for anodic stimulation
+%   MultiVar4_3([0.05],3) for anodic stimulation
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
     dt = 0.01;
-    tspan = 200; %400 for full prop to end of fibre
+    tspan = 200; 
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.025;  % must increase for better graph resolution
+    dx = 0.025;  
     xspan = 2;
 	[x,xloop] = FindX(xspan,dx);
 
@@ -36,7 +36,7 @@ function [Done] = MultiVar4_3(Distance,I)
 %%  Running through the various input diameters 
     for i=1:length(Distance)
         Distance1 = Distance(i);
-        [data,t,m,h,n,f] = HHsim(Distance1,I,t,x,loop,xloop,dx);
+        [data,t,f,x] = HHsim(Distance1,I,t,x,loop,xloop,dx);
         dataholder{1,i} = data;
         fholder{1,i} = f;
     end
@@ -45,7 +45,7 @@ function [Done] = MultiVar4_3(Distance,I)
     for i=1:length(Distance)
         figure
         k = dataholder{1,i};
-        for n = 1:1:xloop-1
+        for n = 2:1:xloop-1
             plot(t,k(n,:)+(n*15),'b');
             hold on
         end
@@ -53,26 +53,12 @@ function [Done] = MultiVar4_3(Distance,I)
         ylabel('Membrane Potential (mV)');
         label=strcat('Action potential propagation for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'mm away from axon');
         title(label);
-        
-        figure
-        k = dataholder{1,i};
-%         for n = 1:1:xloop*dx
-%             plot(x,k(:,n)+(n*15),'b');
-            plot(x,k(:,tspan/2),'b');
-            hold on
-%         end
-        xlabel('Distance');
-        ylabel('Membrane Potential (mV)');
-        label=strcat('Action potential propagation for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'mm away from axon');
-        title(label);
-        
+      
         figure
         k = fholder{1,i};
         plot(x,k(:,tspan/2));
-%         xlim([7,13])
-        xlabel('Time (msec)');
-        ylabel('Membrane Potential (mV)');
-        label=strcat('Action potential propagation for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'mm away from axon');
+        xlabel('Fibre length (cm)');
+        label=strcat('Activation function for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'mm away from axon');
         title(label);
     end
 end
@@ -80,20 +66,18 @@ end
 %%	Creating simulation timeframe
 function [t,loop] = FindT(tspan,dt)
     loop  = ceil(tspan/dt);
-    t = (1:loop)*dt;
+    t = (0:loop)*dt;
 end
 
 %%	Creating simulation fibre length
 function [x,xloop] = FindX(xspan,dx)
     xloop  = ceil(xspan/dx);
-    x = (1:xloop)*dx;
+    x = (0:xloop)*dx;
 end
 
 %%  Hodgkin-Huxley model
-function [V,t,m,h,n,f] = HHsim(z,defI,t,x,loop,xloop,dx)    
-    defIdur= 1;         % duration of stimulation application (in msec)
+function [v,t,f,x] = HHsim(z,defI,t,x,loop,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
-    PulsePos = [1];     % PulsePos is a vector dictating the start time in msec of each successive pulse, eg. [1,17,26,40]
     dt = 0.001;         % time steps for simulation
     Diameter = 0.0012;  % Diameter of fibre (in cm)
     
@@ -116,12 +100,12 @@ function [V,t,m,h,n,f] = HHsim(z,defI,t,x,loop,xloop,dx)
     v0 = V0 - Vrest;            % Initial value of normalised membrane potential (in mV)    
     
 %%	Initializing variable vectors  
-    V = zeros(xloop,loop);        % Membrane potential
-    v = zeros(xloop,loop);        % Normalised membrane potential
+    V = zeros(xloop+1,loop+1);      % Membrane potential
+    v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
     xe = zeros(xloop,loop+1);       % Distance along axon away from electrode
-    f = zeros(xloop,loop);          % Activating function
+    f = zeros(xloop+1,loop+1);      % Activating function
 	m = zeros(xloop,loop+1);        % Gating variable m
 	h = zeros(xloop,loop+1);        % Gating variable h
 	n = zeros(xloop,loop+1);        % Gating variable n
@@ -136,11 +120,10 @@ function [V,t,m,h,n,f] = HHsim(z,defI,t,x,loop,xloop,dx)
     alphaH = zeros(xloop,loop+1);   % Gating variable rate constant
     betaH = zeros(xloop,loop+1);    % Gating variable rate constant
    
-%%	Ispan is the applied current vector to hold all instances of the external 
-%   current applied over the simulation period as specified by PulsePos vector  
-    n = xloop/6;
+%%	Ispan is the applied current vector to hold all instances of the external  
+    q = xloop/6;
     p = xloop/2;
-    Ispan(p-n:p+n,100:500) = defI;
+    Ispan(p-q:p+q,100:500) = defI;
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);
@@ -156,14 +139,14 @@ function [V,t,m,h,n,f] = HHsim(z,defI,t,x,loop,xloop,dx)
     
 %%	Solver: Euler method
     for i=1:1:loop-1
-        for s=1:1:xloop-1
+        for s=2:1:xloop-1
             electrodePos = p;
             xe(s,i) = dx*(s-electrodePos);
         end
     end
             
     for i=1:1:loop-1
-        for s=1:1:xloop-1
+        for s=2:1:xloop-1
             v(s,i) = V(s,i) - Vrest;
             alphaN(s,i) = (0.1-0.01*v(s,i))/(exp(1-0.1*v(s,i))-1);
             betaN(s,i) = 0.125*exp(-v(s,i)/80);
@@ -176,18 +159,20 @@ function [V,t,m,h,n,f] = HHsim(z,defI,t,x,loop,xloop,dx)
             Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
             if s-1<=0
                 Im(s,i) = (Diameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i));
-                f(s,i) = ((re*Ispan(s,i))/(4*pi))*(((xe(s,i)^2)+(z^2))^(-5/2))*(2*(xe(s,i)^2)-(z^2));
+                f(s,i) = (Diameter/(4*ri*dx*L))*((re*Ispan(s,i))/(4*pi))*(((xe(s,i)^2)+(z^2))^(-5/2))*(2*(xe(s,i)^2)-(z^2));
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-                V(s,i+1) = V(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;  
+                V(s,i+1) = V(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;
+                v(s,i+1) = v(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;
             else
                 Im(s,i) = (Diameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i));
                 f(s,i) = ((re*Ispan(s,i))/(4*pi))*(((xe(s,i)^2)+(z^2))^(-5/2))*(2*(xe(s,i)^2)-(z^2));
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-                V(s,i+1) = V(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;  
+                V(s,i+1) = V(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;
+                v(s,i+1) = v(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;
             end
             n(s,i+1) = n(s,i) + dn(s,i);
             m(s,i+1) = m(s,i) + dm(s,i);

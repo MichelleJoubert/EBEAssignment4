@@ -1,4 +1,4 @@
-function [Done] = MultiVar4_51(Distance,I)
+function [Done] = MultiVar4_5(Distance,I)
 %   This function simulates the propagation of an action potential along   
 %   nerve fibre of various distances away from the nerve fibre stimulated by    
 %	a bipolar stimulation pulse.
@@ -14,9 +14,9 @@ function [Done] = MultiVar4_51(Distance,I)
 %   I is the applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_51([0.025],10000) for bipolar stimulation with anode then
+%   MultiVar4_5([0.025],10000) for bipolar stimulation with anode then
 %   cathode placed along fibre 
-%   MultiVar4_51([0.025],2000)for bipolar stimulation with cathode then
+%   MultiVar4_5([0.025],2000)for bipolar stimulation with cathode then
 %   anode placed along fibre for cathode propagation (swop signs of defI in Ispan and electrodePos 1 and 2)
 %
 %%	Simulation timing variables
@@ -29,8 +29,8 @@ function [Done] = MultiVar4_51(Distance,I)
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.1;
-    xspan = 40;
+    dx = 0.05;
+    xspan = 10;
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';

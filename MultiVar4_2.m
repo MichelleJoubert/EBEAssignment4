@@ -1,20 +1,18 @@
-function [Done] = MultiVar4_2(Diameter,I,Idur,sType)
+function [Done] = MultiVar4_2(Diameter,I,sType)
 %   This function simulates the propagation of an action potential across a synapse. 
 % 
-%   MultiVar4_1(Diameter,I,Idur) function is a simple synapse model that uses  
+%   MultiVar4_2(Diameter,I,sType) function is a simple synapse model that uses  
 %   the Hodgkin-Huxley modelfor the squid giant axon constants and user specified  
 %   values of thefibre diameter in cm. As output it plots voltage (membrane   
 %   potential) time series for each of the various fibre diameters. 
-%   Diameter is the fibre diameter (in cm). This variable is a list of
-%   values to allow for investigation of multiple diameters at once.
+%   Diameter is the fibre diameter (in cm). 
 %   I is the applied current or external stimulation (in µA)
-%   Idur is the duration of stimulation application (in msec)
 %   Selecting "sType" = 1 applies inhibitory synapse characteristics
 %   Selecting "sType" = 2 applies excitatory synapse characteristics
 %
 %   Example:
-%   MultiVar4_2([0.01],1,1,1) for inhibitory synapse
-%   MultiVar4_2([0.01],1,1,2) for excitatory synapse
+%   MultiVar4_2(0.01,1,1) for inhibitory synapse
+%   MultiVar4_2(0.01,1,2) for excitatory synapse
 %
 %%	Simulation timing variables
     t = 0;
@@ -33,22 +31,16 @@ function [Done] = MultiVar4_2(Diameter,I,Idur,sType)
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-    for i=1:length(Diameter)
-        Diameter1 = Diameter(i);
-        [data,t,m,h,n,Ispan,synapsePos] = HHsim(Diameter1,I,Idur,sType,t,x,loop,xloop,dx,xspan);
-        dataholder{1,i} = data;
-    end
+        [data,t,synapsePos] = HHsim(Diameter,I,sType,t,x,loop,xloop,dx);
     
 %%  Plots of membrane potential for various input diameters   
-    for i=1:length(Diameter)
         figure
-        x = dataholder{1,i};
         for n = 2:7:xloop-1
             hold on
             if n == synapsePos 
-                plot(t,x(n,:)+(n*10),'r');
+                plot(t,data(n,:)+(n*10),'r');
             else
-                plot(t,x(n,:)+(n*10),'b');
+                plot(t,data(n,:)+(n*10),'b');
             end   
         end
         xlabel('Time (msec)');
@@ -59,7 +51,6 @@ function [Done] = MultiVar4_2(Diameter,I,Idur,sType)
             label=strcat('Action potential propagation across an excitatory synapse');
         end
         title(label);
-    end
 end
 
 %%	Creating simulation timeframe
@@ -75,14 +66,9 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [V,t,m,h,n,Ispan,synapsePos] = HHsim(defDiameter,defI,defIdur,defsType,t,x,loop,xloop,dx,xspan)    
+function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
-    PulsePos = [1];     % PulsePos is a vector dictating the start time in msec of each successive pulse, eg. [1,17,26,40]
     dt = 0.001;         % time steps
-    synapsePos = (xloop/2);	% Position (spatial) of synapse
-    t_0 = 18000;        % for inhibitory
-%     t_0 = 18300;        % for excitatory
-    t0 = 10*t_0*dt;     % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
@@ -123,17 +109,6 @@ function [V,t,m,h,n,Ispan,synapsePos] = HHsim(defDiameter,defI,defIdur,defsType,
     betaH = zeros(xloop,loop+1);	% Gating variable rate constant
     
 %%	Ispan is the applied current vector to hold all instances of the external 
-%   current applied over the simulation period as specified by PulsePos vector    
-%     IspanEnd = ceil(defIdur/dt); 
-%     for i=1:length(PulsePos)
-%         IspanPulsePos = (ceil(PulsePos(i)/dt));
-%         if IspanPulsePos + IspanEnd < length(Ispan)
-%             PlusSpan = IspanPulsePos + IspanEnd;
-%         else
-%             PlusSpan = length(Ispan);
-%         end
-%         Ispan(2,IspanPulsePos:PlusSpan) = Ispan(2,IspanPulsePos:PlusSpan)+defI;
-%     end
     Ispan(2,3000:4000) = defI;
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
@@ -159,42 +134,42 @@ function [V,t,m,h,n,Ispan,synapsePos] = HHsim(defDiameter,defI,defIdur,defsType,
             alphaH(s,i) = 0.07*exp(-v(s,i)/20);
             betaH(s,i) = 1/(exp(3-0.1*v(s,i))+1);
             
-            if s == synapsePos && i >= t_0
+            synapsePos = (xloop/2);	% Position (spatial) of synapse
+            if s == synapsePos %&& i >= t_0
                 if defsType == 1        % Inhibitory synapse
-                    Esyn = -75;         % Synatic reversal potential for inhibitory synapses (in mV) (75mV)
-                    gSynMax = 40;       % maximum Synatic conductance for inhibitory synapses (in pS) (40pS)
-%                     gSynMax = 4*(10^(-5));
-                    tau = 5;            % Time constant for inhibitory synapses (in msec) (5msec)
-                    gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
-                    Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
+                    t_0 = 18000;
+                    t0 = 10*t_0*dt;     % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
+                    if i >= t_0
+                        Esyn = -75;         % Synatic reversal potential for inhibitory synapses (in mV) (-75mV)
+                        gSynMax = 40;       % maximum Synatic conductance for inhibitory synapses (in pS) (40pS)
+                        tau = 5;            % Time constant for inhibitory synapses (in msec) (5msec)
+                        gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
+                        Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
+                    end
                 elseif defsType == 2    % Excitatory synapse
-                    Esyn = 0;           % Synatic reversal potential for Excitatory synapses (in mV) (0mV)
-                    gSynMax = 720;   	% maximum Synatic conductance for Excitatory synapses (in pS) (720pS)
-%                     gSynMax = 72*(10^(-5));
-                    tauRise = 0.09;     % Time constant for Excitatory synapses (in msec) (0.09msec)
-                    tauDecay = 1.5;     % Time constant for Excitatory synapses (in msec) (1.5msec)
-                    tPeak = t0 + (tauDecay*tauRise)/(tauDecay - tauRise)*(log(tauDecay/tauRise));
-                    N = 1/(-exp((t0 - tPeak)/tauRise)+exp((t0 - tPeak)/tauDecay));
-                    gSyn(s,i) = gSynMax*N*((exp((t0-t(1,i))/tauDecay) - exp((t0-t(1,i))/tauRise)));
-                    Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
+                    t_0 = 18000;
+                    t0 = 10*t_0*dt;     % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
+                    if i >= t_0
+                        Esyn = 0;           % Synatic reversal potential for Excitatory synapses (in mV) (0mV)
+                        gSynMax = 720;   	% maximum Synatic conductance for Excitatory synapses (in pS) (720pS)
+                        tauRise = 0.09;     % Time constant for Excitatory synapses (in msec) (0.09msec)
+                    	tauDecay = 1.5;     % Time constant for Excitatory synapses (in msec) (1.5msec)
+                        tPeak = t0 + (tauDecay*tauRise)/(tauDecay - tauRise)*(log(tauDecay/tauRise));
+                        N = 1/(-exp((t0 - tPeak)/tauRise)+exp((t0 - tPeak)/tauDecay));
+                        gSyn(s,i) = gSynMax*N*((exp((t0-t(1,i))/tauDecay) - exp((t0-t(1,i))/tauRise)));
+                        Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
+                    end
                 end
             end
 
             Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
-%             if s-1<=0
-%                 Im(s,i) = (defDiameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i)) + (Ispan(s,i)/(pi*defDiameter*L));
-%                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
-%                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
-%                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-%                 V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;  
-%             else
-                Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
-                dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
-                dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
-                dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-                V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;
-                v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm; 
-%             end
+            Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+            dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
+            dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
+            dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
+           
+            V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;
+            v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm; 
             n(s,i+1) = n(s,i) + dn(s,i);
             m(s,i+1) = m(s,i) + dm(s,i);
             h(s,i+1) = h(s,i) + dh(s,i);
