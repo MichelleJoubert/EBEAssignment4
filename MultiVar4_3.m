@@ -55,6 +55,18 @@ function [Done] = MultiVar4_3(Distance,I)
         title(label);
         
         figure
+        k = dataholder{1,i};
+%         for n = 1:1:xloop*dx
+%             plot(x,k(:,n)+(n*15),'b');
+            plot(x,k(:,tspan/2),'b');
+            hold on
+%         end
+        xlabel('Distance');
+        ylabel('Membrane Potential (mV)');
+        label=strcat('Action potential propagation for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'mm away from axon');
+        title(label);
+        
+        figure
         k = fholder{1,i};
         plot(x,k(:,tspan/2));
 %         xlim([7,13])

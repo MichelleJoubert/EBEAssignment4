@@ -19,13 +19,13 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
     t = 0;
     loop = 0;
     dt = 0.01;
-    tspan = 400;
+    tspan = 800;
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.1;
+    dx = 0.05;
     xspan = 10;
 	[x,xloop] = FindX(xspan,dx);
 
@@ -109,17 +109,20 @@ function [V,t,m,h,n,Ispan] = HHsim(defDiameter,defI,defIdur,t,x,loop,xloop,dx)
    
 %%	Ispan is the applied current vector to hold all instances of the external 
 %   current applied over the simulation period as specified by PulsePos vector 
-    IspanEnd = ceil(defIdur/dt);
-    for i=1:length(PulsePos)
-        IspanPulsePos = (ceil(PulsePos(i)/dt));
-        if IspanPulsePos + IspanEnd < length(Ispan)
-            PlusSpan = IspanPulsePos + IspanEnd;
-        else
-            PlusSpan = length(Ispan);
-        end
-        Ispan(PulsePos(i),IspanPulsePos:PlusSpan) = Ispan(PulsePos(i),IspanPulsePos:PlusSpan)+defI;
-    end
-    
+%     IspanEnd = ceil(defIdur/dt);
+%     for i=1:length(PulsePos)
+%         IspanPulsePos = (ceil(PulsePos(i)/dt));
+%         if IspanPulsePos + IspanEnd < length(Ispan)
+%             PlusSpan = IspanPulsePos + IspanEnd;
+%         else
+%             PlusSpan = length(Ispan);
+%         end
+%         Ispan(PulsePos(i),IspanPulsePos:PlusSpan) = Ispan(PulsePos(i),IspanPulsePos:PlusSpan)+defI;
+%     end
+    p = xloop/2;
+%     Ispan(10,3000:4000) = defI;
+    Ispan(10,:) = defI;
+
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);
     
@@ -146,12 +149,14 @@ function [V,t,m,h,n,Ispan] = HHsim(defDiameter,defI,defIdur,t,x,loop,xloop,dx)
             Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
             if s-1<=0
                 Im(s,i) = (defDiameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+%                 Im(s,i) = (defDiameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i)) + (Ispan(s,i));
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
                 V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm;  
             else
-                Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+                Im(s,i) = (defDiameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+%                 Im(s,i) = (defDiameter/(4*ri*dx*L))*(2*v(s+1,i)-2*v(s,i)) + (Ispan(s,i));
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
