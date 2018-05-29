@@ -14,8 +14,8 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %   Selecting "PType" = 3 applies a ramp function stimulus 
 %
 %   Example:
-%   MultiVar4_7([0.01],0.4,1) for sine wave (for Question 4.7 i)
-%   MultiVar4_7([0.01],0.4,2) for square wave (for Question 4.7 ii)
+%   MultiVar4_7([0.01],1,1) for sine wave (for Question 4.7 i)
+%   MultiVar4_7([0.01],1,2) for square wave (for Question 4.7 ii)
 %   MultiVar4_7([0.01],1,3) for ramp function (for Question 4.8)
 %
 %%	Simulation timing variables
@@ -45,7 +45,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
     for i=1:length(Diameter)
         figure
         x = dataholder{1,i};
-        for n = 2:2:xloop
+        for n = 2:2:xloop-1
             plot(t,x(n,:)+(n*15),'b');
             hold on
         end
@@ -99,7 +99,7 @@ end
 %%  Hodgkin-Huxley model
 function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,xloop,dx)    
     defTemp = 6.3;     % environmental temperature (in deg Celsius)
-    freq = 10;         % Frequency for sine and square waves
+    freq = 13.5;         % Frequency for sine and square waves
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
@@ -144,7 +144,7 @@ function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,xloop,dx
         Ispan(p,:) = defI*sin(2*pi*freq*(10^(-3))*t);
     elseif defPType == 2    % square periodic pulsatile stimulus  
         dt = 0.001;         % time steps for simulation
-        Ispan(p,:) = 0.5*defI*((square(2*pi*freq*(10^(-3))*t))+1);
+        Ispan(p,:) = defI*((square(2*pi*freq*(10^(-3))*t))+1);
     elseif defPType == 3	% ramp function
         dt = 0.01;          % time steps for simulation
         unitstep = t>=0;

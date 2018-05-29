@@ -14,8 +14,8 @@ function [Done] = MultiVar4_3(Distance,I)
 %   I is the applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_3([0.05],-5) for cathodic stimulation (for Question 4.4)
-%   MultiVar4_3([0.05],3) for anodic stimulation (for Question 4.3)
+%   MultiVar4_3([0.06,0.05,0.04],-5) for cathodic stimulation (for Question 4.4)
+%   MultiVar4_3([0.07,0.06,0.05],3) for anodic stimulation (for Question 4.3)
 %
 %%	Simulation timing variables
     t = 0;
@@ -51,14 +51,14 @@ function [Done] = MultiVar4_3(Distance,I)
         end
         xlabel('Time (msec)');
         ylabel('Membrane Potential (mV)');
-        label=strcat('Action potential propagation for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'cm away from axon');
+        label=strcat('AP propagation with electrode a distance of ',{' '},num2str(Distance(i)),'cm from axon');
         title(label);
       
         figure
         k = fholder{1,i};
         plot(x,k(:,tspan/2));
         xlabel('Fibre length (cm)');
-        label=strcat('Activation function for fibre with electrode a distance of ',{' '},num2str(Distance(i)),'cm away from axon');
+        label=strcat('Activation function with electrode a distance of ',{' '},num2str(Distance(i)),'cm from axon');
         title(label);
     end
 end

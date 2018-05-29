@@ -29,22 +29,22 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-        [data,t,p] = HHsim(Diameter,I1,I2,t,x,loop,xloop,dx);
+    [data,t,p] = HHsim(Diameter,I1,I2,t,x,loop,xloop,dx);
     
 %%  Plots of membrane potential for various input diameters   
-        figure
-        for n = 2:2:xloop-1
-            hold on
-            if n == p 
-                plot(t,data(n,:)+(n*50),'r');
-            else
-                plot(t,data(n,:)+(n*50),'b');
-            end  
-        end
-        xlabel('Time (msec)');
-        ylabel('Membrane Potential (mV)');
-        label=strcat('Action potential propagation with a high frequency blockade');
-        title(label);
+    figure
+    for n = 2:2:xloop-1
+        hold on
+        if n == p 
+            plot(t,data(n,:)+(n*50),'r');
+        else
+            plot(t,data(n,:)+(n*50),'b');
+        end  
+    end
+	xlabel('Time (msec)');
+	ylabel('Membrane Potential (mV)');
+	label=strcat('Action potential propagation with a high frequency blockade');
+	title(label);
 end
 
 %%	Creating simulation timeframe

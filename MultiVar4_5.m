@@ -14,7 +14,7 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 %   
 %   Example:
 %   MultiVar4_5(0.05,0.05,3) for symmetric bipolar stimulation (for Question 4.5)
-%   MultiVar4_5(0.05,0.055,3) for assymetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.05,0.055,3) for asymetric bipolar stimulation (for Question 4.5)
 %
 %%	Simulation timing variables
     t = 0;
@@ -43,14 +43,14 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
     end
     xlabel('Time (msec)');
     ylabel('Membrane Potential (mV)');
-    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm away from axon');
+    label=strcat('AP propagation with electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm from axon');
     title(label);
         
     figure
     plot(x,f(:,190),'b');
     xlabel('Fibre length (cm)');
     ylabel('Activating function (mV)');
-    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm away from axon');
+    label=strcat('Activation function with electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm from axon');
     title(label);
 end
 
@@ -70,7 +70,7 @@ end
 function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
     dt = 0.001;         % time steps for simulation
-    Diameter = 0.012;   % Diameter of fibre (in cm)
+    Diameter = 0.01;    % Diameter of fibre (in cm)0.012
 
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
