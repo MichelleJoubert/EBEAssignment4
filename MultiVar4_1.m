@@ -90,8 +90,8 @@ function [v,t] = HHsim(defDiameter,defI,Idur,t,x,loop,xloop,dx)
     v0 = V0 - Vrest;            % Initial value of normalised membrane potential (in mV)
     
 %%	Initializing variable vectors
-    V = zeros(xloop+1,loop+1);        % Membrane potential
-    v = zeros(xloop+1,loop+1);        % Normalised membrane potential
+    V = zeros(xloop+1,loop+1);      % Membrane potential
+    v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
 	m = zeros(xloop,loop+1);        % Gating variable m
