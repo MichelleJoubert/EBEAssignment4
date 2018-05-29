@@ -14,9 +14,9 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %   Selecting "PType" = 3 applies a ramp function stimulus 
 %
 %   Example:
-%   MultiVar4_7([0.01],0.4,1) for sine wave 
-%   MultiVar4_7([0.01],0.4,2) for square wave
-%   MultiVar4_7([0.01],1,3) for ramp function
+%   MultiVar4_7([0.01],0.4,1) for sine wave (for Question 4.7 i)
+%   MultiVar4_7([0.01],0.4,2) for square wave (for Question 4.7 ii)
+%   MultiVar4_7([0.01],1,3) for ramp function (for Question 4.8)
 %
 %%	Simulation timing variables
     t = 0;
@@ -69,7 +69,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
             
         yyaxis right
         plot(t,Ispan(p,:));
-        ylabel('Stimulus (µAmps)');
+        ylabel('Stimulus (µA)');
         maxIspan = max(Ispan(:));
         minIspan = min(Ispan(:));
         ylim([(minIspan-0.01) (maxIspan+0.01)]);
@@ -108,7 +108,7 @@ function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,xloop,dx
 	vK= -12;                    % Ionic potential for potassium channels (in mV)
 	gL= 0.3;                    % Conductance of leakage channels (in m.mho/cm^2)
 	vL= 10.6;                   % Ionic potential for leakage channels (in mV)
-	Cm = 1;                     % Capacitance of membrane (in micro.F/cm^2)
+	Cm = 1;                     % Capacitance of membrane (in µF/cm^2)
     L = dx;                     % unmyelinated fibre
     ri = 0.1;                   % specific resistance of axoplasm (in kOhm.cm)
     m0 = 0.05;                  % Initial value of gating variable m

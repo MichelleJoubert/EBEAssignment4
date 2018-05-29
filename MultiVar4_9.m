@@ -9,7 +9,8 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
 %   I2 is the high frequency applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_9(0.012,0.1,10) for working high frequency blockade
+%   MultiVar4_9(0.012,0.1,10) for working high frequency blockade (for
+%   Question 4.9)
 %
 %%	Simulation timing variables
     t = 0;
@@ -70,7 +71,7 @@ function [v,t,p] = HHsim(Diameter,defI1,defI2,t,x,loop,xloop,dx)
 	vK= -12;                    % Ionic potential for potassium channels (in mV)
 	gL= 0.3;                    % Conductance of leakage channels (in m.mho/cm^2)
 	vL= 10.6;                   % Ionic potential for leakage channels (in mV)
-	Cm = 1;                     % Capacitance of membrane (in micro.F/cm^2)
+	Cm = 1;                     % Capacitance of membrane (in µF/cm^2)
     L = dx;                     % unmyelinated fibre
     ri = 0.1;                   % specific resistance of axoplasm (in kOhm.cm)
     m0 = 0.05;                  % Initial value of gating variable m

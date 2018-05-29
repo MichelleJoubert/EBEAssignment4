@@ -11,8 +11,8 @@ function [Done] = MultiVar4_2(Diameter,I,sType)
 %   Selecting "sType" = 2 applies excitatory synapse characteristics
 %
 %   Example:
-%   MultiVar4_2(0.01,1,1) for inhibitory synapse
-%   MultiVar4_2(0.01,1,2) for excitatory synapse
+%   MultiVar4_2(0.01,1,1) for inhibitory synapse (for Question 4.2)
+%   MultiVar4_2(0.01,1,2) for excitatory synapse (for Question 4.2)
 %
 %%	Simulation timing variables
     t = 0;
@@ -88,8 +88,8 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,xloop,dx)
     v0 = V0 - Vrest;            % Initial value of normalised membrane potential (in mV)
     
 %%	Initializing variable vectors
-    V = zeros(xloop+1,loop+1);        % Membrane potential
-    v = zeros(xloop+1,loop+1);        % Normalised membrane potential
+    V = zeros(xloop+1,loop+1);      % Membrane potential
+    v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
 	m = zeros(xloop,loop+1);        % Gating variable m
@@ -134,32 +134,19 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,xloop,dx)
             alphaH(s,i) = 0.07*exp(-v(s,i)/20);
             betaH(s,i) = 1/(exp(3-0.1*v(s,i))+1);
             
-            synapsePos = (xloop/2);	% Position (spatial) of synapse
-            if s == synapsePos %&& i >= t_0
+            synapsePos = (xloop/2);     % Position (spatial) of synapse
+            t_0 = 17700;
+            if s == synapsePos && i >= t_0      
+                t0 = 10*t_0*dt;         % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
                 if defsType == 1        % Inhibitory synapse
-                    t_0 = 18000;
-                    t0 = 10*t_0*dt;     % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
-                    if i >= t_0
-                        Esyn = -75;         % Synatic reversal potential for inhibitory synapses (in mV) (-75mV)
-                        gSynMax = 40;       % maximum Synatic conductance for inhibitory synapses (in pS) (40pS)
-                        tau = 5;            % Time constant for inhibitory synapses (in msec) (5msec)
-                        gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
-                        Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
-                    end
+                    Esyn = -75;         % Synatic reversal potential for inhibitory synapses (in mV) (-75mV)
                 elseif defsType == 2    % Excitatory synapse
-                    t_0 = 18000;
-                    t0 = 10*t_0*dt;     % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
-                    if i >= t_0
-                        Esyn = 0;           % Synatic reversal potential for Excitatory synapses (in mV) (0mV)
-                        gSynMax = 720;   	% maximum Synatic conductance for Excitatory synapses (in pS) (720pS)
-                        tauRise = 0.09;     % Time constant for Excitatory synapses (in msec) (0.09msec)
-                    	tauDecay = 1.5;     % Time constant for Excitatory synapses (in msec) (1.5msec)
-                        tPeak = t0 + (tauDecay*tauRise)/(tauDecay - tauRise)*(log(tauDecay/tauRise));
-                        N = 1/(-exp((t0 - tPeak)/tauRise)+exp((t0 - tPeak)/tauDecay));
-                        gSyn(s,i) = gSynMax*N*((exp((t0-t(1,i))/tauDecay) - exp((t0-t(1,i))/tauRise)));
-                        Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);
-                    end
+                    Esyn = 0;           % Synatic reversal potential for Excitatory synapses (in mV) (0mV)
                 end
+                gSynMax = 40;           % maximum Synatic conductance for general synapses (in pS) (40pS)
+                tau = 5;                % Time constant for general synapses (in msec) (5msec)
+                gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
+                Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);    
             end
 
             Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);

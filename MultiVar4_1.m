@@ -13,9 +13,9 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
 %
 %   Example:
 %   MultiVar4_1([0.01],0.5,1) for single pulse
-%   MultiVar4_1([0.02,0.01,0.005],0.5,1) for single pulse for multiple
-%   fibre diameters
-%   MultiVar4_1([0.01],0.5,2) for constant pulse
+%   MultiVar4_1([0.02,0.01,0.005,0.002],0.5,1) for single pulse for multiple
+%   fibre diameters (for Question 4.1)
+%   MultiVar4_1([0.01],0.5,2) for constant pulse (for Question 4.6)
 %
 %%	Simulation timing variables
     t = 0;
@@ -50,7 +50,7 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
         end
         xlabel('Time (msec)');
         ylabel('Membrane Potential (mV)');
-        label=strcat('Action potential propagation for fibre of diameter ',{' '},num2str(Diameter(i)),'mm');
+        label=strcat('Action potential propagation for fibre of diameter ',{' '},num2str(Diameter(i)),'cm');
         title(label);
     end
 end
@@ -79,7 +79,7 @@ function [v,t] = HHsim(defDiameter,defI,Idur,t,x,loop,xloop,dx)
 	vK= -12;                    % Ionic potential for potassium channels (in mV)
 	gL= 0.3;                    % Conductance of leakage channels (in m.mho/cm^2)
 	vL= 10.6;                   % Ionic potential for leakage channels (in mV)
-	Cm = 1;                     % Capacitance of membrane (in micro.F/cm^2)
+	Cm = 1;                     % Capacitance of membrane (in µF/cm^2)
     L = dx;                     % unmyelinated fibre
     ri = 0.1;                   % specific resistance of axoplasm (in kOhm.cm)
     m0 = 0.05;                  % Initial value of gating variable m

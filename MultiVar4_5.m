@@ -13,7 +13,8 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 %   I is the applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_5(0.05,0.055,3) for bipolar stimulation 
+%   MultiVar4_5(0.05,0.05,3) for symmetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.05,0.055,3) for assymetric bipolar stimulation (for Question 4.5)
 %
 %%	Simulation timing variables
     t = 0;
@@ -32,7 +33,7 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-        [data,t,f,x] = HHsim(Distance1,Distance2,I,t,x,loop,xloop,dx);
+    [data,t,f,x] = HHsim(Distance1,Distance2,I,t,x,loop,xloop,dx);
     
 %%  Plots of membrane potential for various input diameters   
 	figure
@@ -42,14 +43,14 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
     end
     xlabel('Time (msec)');
     ylabel('Membrane Potential (mV)');
-    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'mm away from axon');
+    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm away from axon');
     title(label);
         
     figure
     plot(x,f(:,190),'b');
-    xlabel('Fibre length (mm)');
+    xlabel('Fibre length (cm)');
     ylabel('Activating function (mV)');
-    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'mm away from axon');
+    label=strcat('Action potential propagation for fibre with bipolar electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm away from axon');
     title(label);
 end
 
@@ -78,7 +79,7 @@ function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,xloop,dx)
 	vK= -12;                    % Ionic potential for potassium channels (in mV)
 	gL= 0.3;                    % Conductance of leakage channels (in m.mho/cm^2)
 	vL= 10.6;                   % Ionic potential for leakage channels (in mV)
-	Cm = 1;                     % Capacitance of membrane (in micro.F/cm^2)
+	Cm = 1;                     % Capacitance of membrane (in µF/cm^2)
     L = dx;                     % unmyelinated fibre
     ri = 0.1;                   % specific resistance of axoplasm (in kOhm.cm)
     re = 0.3;                   % specific extracellular resistance (in kOhm.cm)
