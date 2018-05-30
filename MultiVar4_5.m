@@ -13,27 +13,27 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 %   I is the applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_5(0.05,0.05,3) for symmetric bipolar stimulation (for Question 4.5)
-%   MultiVar4_5(0.05,0.055,3) for asymetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.07,0.07,0.5) for symmetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.07,0.09,0.5) for asymetric bipolar stimulation (for Question 4.5)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
-    dt = 0.01;
-    tspan = 200;
+    dt = 0.001;     % time steps for simulation
+    tspan = 50;     % total simulation time    
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.02;
-    xspan = 2;
+    dx = 0.02;      % spatial steps
+    xspan = 2;      % total fibre length
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-    [data,t,f,x] = HHsim(Distance1,Distance2,I,t,x,loop,xloop,dx);
+    [data,t,f,x] = HHsim(Distance1,Distance2,I,t,x,loop,dt,xloop,dx);
     
 %%  Plots of membrane potential for various input diameters   
 	figure
@@ -42,12 +42,11 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
         hold on
     end
     xlabel('Time (msec)');
-    ylabel('Membrane Potential (mV)');
     label=strcat('AP propagation with electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm from axon');
     title(label);
         
     figure
-    plot(x,f(:,190),'b');
+    plot(x,f(:,3500),'b');
     xlabel('Fibre length (cm)');
     ylabel('Activating function (mV)');
     label=strcat('Activation function with electrodes a distance ',{' '},num2str(Distance1),' and',{' '},num2str(Distance2),'cm from axon');
@@ -67,10 +66,9 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,xloop,dx)    
+function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
-    dt = 0.001;         % time steps for simulation
-    Diameter = 0.01;    % Diameter of fibre (in cm)0.012
+    Diameter = 0.01;    % Diameter of fibre (in cm)
 
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
@@ -117,8 +115,8 @@ function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,xloop,dx)
 
 %%	Ispan is the applied current vector to hold all instances of the external 
     p = xloop/2;
-    Ispan2(p+1:p+11,100:150) = +defI;
-    Ispan1(p-11:p-1,100:150) = -defI;
+    Ispan2(p+1:p+11,3000:3500) = +defI;
+    Ispan1(p-11:p-1,3000:3500) = -defI;
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);
@@ -135,10 +133,10 @@ function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,xloop,dx)
 %%	Solver: Euler method
     for i=1:1:loop-1
         for s=2:1:xloop-1
-            electrodePos1 = p*dx-0.01;
-            xe1(s,i) = dx*s-electrodePos1;
-            electrodePos2 = p*dx+0.01;
-            xe2(s,i) = dx*s-electrodePos2;
+            electrodePos1 = p*dx-0.01;          % position of electrode1
+            xe1(s,i) = s*dx-electrodePos1;      % gives fibre distance away from electrode1 for different dx segments
+            electrodePos2 = p*dx+0.01;          % position of electrode1
+            xe2(s,i) = s*dx-electrodePos2;      % gives fibre distance away from electrode2 for different dx segments
         end
     end
  

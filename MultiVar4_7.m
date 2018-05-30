@@ -14,22 +14,22 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %   Selecting "PType" = 3 applies a ramp function stimulus 
 %
 %   Example:
-%   MultiVar4_7([0.01],1,1) for sine wave (for Question 4.7 i)
-%   MultiVar4_7([0.01],1,2) for square wave (for Question 4.7 ii)
-%   MultiVar4_7([0.01],1,3) for ramp function (for Question 4.8)
+%   MultiVar4_7([0.01],0.5,1) for sine wave (for Question 4.7 i)
+%   MultiVar4_7([0.01],0.5,2) for square wave (for Question 4.7 ii)
+%   MultiVar4_7([0.01],0.25,3) for ramp function (for Question 4.8)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
-    dt = 0.01;
-    tspan = 800;
+    dt = 0.001;     % time steps for simulation
+    tspan = 100;    % total simulation time
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.1;
-    xspan = 10;
+    dx = 0.1;       % spatial steps
+    xspan = 10;     % total fibre length
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
@@ -37,7 +37,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %%  Running through the various input diameters 
     for i=1:length(Diameter)
         Diameter1 = Diameter(i);
-        [data,t,m,h,n,Ispan,p] = HHsim(Diameter1,I,PType,t,x,loop,xloop,dx);
+        [data,t,m,h,n,Ispan,p] = HHsim(Diameter1,I,PType,t,x,loop,dt,xloop,dx);
         dataholder{1,i} = data;
     end
     
@@ -45,12 +45,11 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
     for i=1:length(Diameter)
         figure
         x = dataholder{1,i};
-        for n = 2:2:xloop-1
-            plot(t,x(n,:)+(n*15),'b');
+        for k = 2:2:xloop-1
+            plot(t,x(k,:)+(k*15),'b');
             hold on
         end
         xlabel('Time (msec)');
-        ylabel('Membrane Potential (mV)');
         if PType == 1
             label=strcat('Action potential propagation for fibre under sine wave stimulation');
         elseif PType == 2
@@ -81,6 +80,15 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
             label=strcat('Applied current for fibre under ramp function stimulation');
         end
         title(label); 
+        
+        if PType == 3
+            figure
+            plot(t,m(p,:),t,n(p,:),t,h(p,:));
+            xlabel('Time (msec)');
+            ylabel('Magnitude of gating variables');
+            title('Gating variables at stimulus site for ramp function stimulation');  
+            legend('m','n', 'h'); 
+        end
     end
 end
 
@@ -97,9 +105,9 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,xloop,dx)    
-    defTemp = 6.3;     % environmental temperature (in deg Celsius)
-    freq = 13.5;         % Frequency for sine and square waves
+function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,dt,xloop,dx)    
+    defTemp = 6.3;      % environmental temperature (in deg Celsius)
+    freq = 135;         % Frequency for sine and square waves (possibly only 125 or 130)
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
@@ -140,16 +148,13 @@ function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,xloop,dx
 %%	Ispan is the applied current vector to hold all instances of the external   
     p = xloop/2;
     if defPType == 1        % sinusoidal stimulus
-        dt = 0.001;         % time steps for simulation
         Ispan(p,:) = defI*sin(2*pi*freq*(10^(-3))*t);
     elseif defPType == 2    % square periodic pulsatile stimulus  
-        dt = 0.001;         % time steps for simulation
         Ispan(p,:) = defI*((square(2*pi*freq*(10^(-3))*t))+1);
     elseif defPType == 3	% ramp function
-        dt = 0.01;          % time steps for simulation
         unitstep = t>=0;
         ramp = t.*unitstep;
-        Ispan(p,:) = 0.5*defI*0.0025*ramp;
+        Ispan(p,:) = defI*0.01*ramp;
     end
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables

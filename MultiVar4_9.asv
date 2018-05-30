@@ -1,55 +1,61 @@
-function [Done] = MultiVar4_2(Diameter,I,sType)
-%   This function simulates the propagation of an action potential across a synapse. 
-% 
-%   MultiVar4_2(Diameter,I,sType) function is a simple synapse model that uses  
-%   the Hodgkin-Huxley modelfor the squid giant axon constants and user specified  
-%   values of thefibre diameter in cm. As output it plots voltage (membrane   
-%   potential) time series for each of the various fibre diameters. 
-%   Diameter is the fibre diameter (in cm). 
-%   I is the applied current or external stimulation (in µA)
-%   Selecting "sType" = 1 applies inhibitory synapse characteristics
-%   Selecting "sType" = 2 applies excitatory synapse characteristics
+function [Done] = MultiVar4_9(Diameter,I1,I2)
+%   This function simulates a high frequency blockade. 
 %
+%   MultiVar4_9(Distance,I1,I2) function simulates the Hodgkin-Huxley model 
+%   for the squid giant axon constants and an applied high frequency blockade.        
+%   As output it plots voltage(membrane potential)time series. 
+%   Diameter is the fibre diameter (in cm). 
+%   I1 is the low frequency applied current or external stimulation (in µA)
+%   I2 is the high frequency applied current or external stimulation (in µA)
+%   
 %   Example:
-%   MultiVar4_2(0.01,1,1) for inhibitory synapse (for Question 4.2)
-%   MultiVar4_2(0.01,1,2) for excitatory synapse (for Question 4.2)
+%   MultiVar4_9(0.012,0.1,10) for working high frequency blockade (for
+%   Question 4.9)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
     dt = 0.001;     % time steps for simulation
-    tspan = 50;     % total simulation time 
+    tspan = 100;	% total simulation time
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
     dx = 0.05;      % spatial steps
-    xspan = 10;     % total fibre length
+    xspan = 5;      % total fibre length
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-	[data,t,synapsePos] = HHsim(Diameter,I,sType,t,x,loop,dt,xloop,dx);
+    [data,t,p,m,n,h] = HHsim(Diameter,I1,I2,t,x,loop,dt,xloop,dx);
+%     Mdataholder{1,i}=m;
+%     Ndataholder{1,i}=n;
+%     Hdataholder{1,i}=h;
     
 %%  Plots of membrane potential for various input diameters   
-	figure
-	for n = 2:7:xloop-1
+    figure
+    for k = 2:2:xloop-1
         hold on
-        if n == synapsePos 
-            plot(t,data(n,:)+(n*10),'r');
+        if k == p 
+            plot(t,data(k,:)+(k*50),'r');
         else
-            plot(t,data(n,:)+(n*10),'b');
-        end   
+            plot(t,data(k,:)+(k*50),'b');
+        end  
     end
 	xlabel('Time (msec)');
-	if sType == 1
-        label=strcat('Action potential propagation across an inhibitory synapse');
-	elseif sType == 2
-        label=strcat('Action potential propagation across an excitatory synapse');
-    end
+	label=strcat('Action potential propagation with a high frequency blockade');
 	title(label);
+    
+    figure
+%     plot(t,Mdataholder{1,5},t,Ndataholder{1,5},t,Hdataholder{1,5},'LineWidth',2);
+    plot(t(1,1:300),m(p,1:300),t(1,1:300),n(p,:),t(1,1:300),h(p,:));
+% 	xlim([0 20])
+	xlabel('Time (msec)');
+	ylabel('Magnitude of gating variables');
+ 	title('Gating variables at high frequency stimulus');  
+	legend('m','n', 'h'); 
 end
 
 %%	Creating simulation timeframe
@@ -65,7 +71,7 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx)    
+function [v,t,p,m,n,h] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
     
 %%	Constants and intial values for squid giant axon  
@@ -75,7 +81,7 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx
 	vK= -12;                    % Ionic potential for potassium channels (in mV)
 	gL= 0.3;                    % Conductance of leakage channels (in m.mho/cm^2)
 	vL= 10.6;                   % Ionic potential for leakage channels (in mV)
-	Cm = 1;                     % Capacitance of membrane (in micro.F/cm^2)
+	Cm = 1;                     % Capacitance of membrane (in µF/cm^2)
     L = dx;                     % unmyelinated fibre
     ri = 0.1;                   % specific resistance of axoplasm (in kOhm.cm)
     m0 = 0.05;                  % Initial value of gating variable m
@@ -83,31 +89,34 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx
     h0 = 0.6;                   % Initial value of gating variable h
     Vrest = -70;                % Membrane potential at rest (in mV)
     V0 = Vrest;                 % Initial value of actual membrane potential (in mV)
-    v0 = V0 - Vrest;            % Initial value of normalised membrane potential (in mV)
+    v0 = V0 - Vrest;            % Initial value of normalised membrane potential (in mV)    
     
-%%	Initializing variable vectors
+%%	Initializing variable vectors  
     V = zeros(xloop+1,loop+1);      % Membrane potential
     v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
-	m = zeros(xloop,loop+1);        % Gating variable m
-	h = zeros(xloop,loop+1);        % Gating variable h
-	n = zeros(xloop,loop+1);        % Gating variable n
+	m = zeros(xloop+1,loop+1);        % Gating variable m
+	h = zeros(xloop+1,loop+1);        % Gating variable h
+	n = zeros(xloop+1,loop+1);        % Gating variable n
     dm = zeros(xloop,loop+1);       % Change in Gating variable m
 	dh = zeros(xloop,loop+1);       % Change in Gating variable h
 	dn = zeros(xloop,loop+1);       % Change in Gating variable n
 	Ispan = zeros(xloop,loop+1);    % Stimulating current
-    Isynapse = zeros(xloop,loop);   % Synaptic current
-    gSyn = zeros(xloop,loop);       % Synaptic Conductance
     alphaN = zeros(xloop,loop+1);   % Gating variable rate constant
     betaN = zeros(xloop,loop+1);    % Gating variable rate constant
     alphaM = zeros(xloop,loop+1);   % Gating variable rate constant
-    betaM = zeros(xloop,loop+1);	% Gating variable rate constant
+    betaM = zeros(xloop,loop+1);    % Gating variable rate constant
     alphaH = zeros(xloop,loop+1);   % Gating variable rate constant
-    betaH = zeros(xloop,loop+1);	% Gating variable rate constant
-    
+    betaH = zeros(xloop,loop+1);    % Gating variable rate constant 
+   
 %%	Ispan is the applied current vector to hold all instances of the external 
-    Ispan(2,3000:4000) = defI;
+	q = xloop/4;
+    p = xloop/2;
+    freq1 = 40;      
+	freq2 = 2100;    
+    Ispan(q,:) = defI1*square(2*pi*freq1*(10^(-3))*t);        % Low frequency stimulus to be blocked
+    Ispan(p,:) = defI2*sin(2*pi*freq2*(10^(-3))*t);           % High frequency to create blockade
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);
@@ -121,9 +130,9 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx
         h(s,1) = h0;
     end
     
-%%	Solver: Euler method
-    for i=1:loop-1
-        for s=2:xloop-1
+%%	Solver: Euler method           
+    for i=1:1:loop-1
+        for s=2:1:xloop-1
             v(s,i) = V(s,i) - Vrest;
             alphaN(s,i) = (0.1-0.01*v(s,i))/(exp(1-0.1*v(s,i))-1);
             betaN(s,i) = 0.125*exp(-v(s,i)/80);
@@ -131,30 +140,15 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx
             betaM(s,i) = 4*exp(-v(s,i)/18);
             alphaH(s,i) = 0.07*exp(-v(s,i)/20);
             betaH(s,i) = 1/(exp(3-0.1*v(s,i))+1);
-            
-            synapsePos = (xloop/2);     % Position (spatial) of synapse
-            t_0 = 16000;                 % Position (temporal) of synapse
-            if s == synapsePos && i >= t_0      
-                t0 = t_0*dt;            % presynaptic action potential arrival time (from running MultiVar4_1 for fibre of half the length of total xspan)
-                if defsType == 1        % Inhibitory synapse
-                    Esyn = -75;         % Synatic reversal potential for inhibitory synapses (in mV) (-75mV)
-                elseif defsType == 2    % Excitatory synapse
-                    Esyn = 0;           % Synatic reversal potential for Excitatory synapses (in mV) (0mV)
-                end
-                gSynMax = 40;           % maximum Synatic conductance for general synapses (in pS) (40pS)
-                tau = 5;                % Time constant for general synapses (in msec) (5msec)
-                gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
-                Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);    
-            end
 
             Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
-            Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+            Im(s,i) = (Diameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*Diameter*L));
             dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
             dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
             dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-           
-            V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;
-            v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm; 
+            
+            V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm; 
+            v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm;
             n(s,i+1) = n(s,i) + dn(s,i);
             m(s,i+1) = m(s,i) + dm(s,i);
             h(s,i+1) = h(s,i) + dh(s,i);

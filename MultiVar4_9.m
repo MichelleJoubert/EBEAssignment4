@@ -15,36 +15,55 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
 %%	Simulation timing variables
     t = 0;
     loop = 0;
-    dt = 0.01;
-    tspan = 800; 
+    dt = 0.001;     % time steps for simulation
+    tspan = 100;	% total simulation time
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.05;
-    xspan = 5;      % length of fibre in cm
+    dx = 0.05;      % spatial steps
+    xspan = 5;      % total fibre length
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-    [data,t,p] = HHsim(Diameter,I1,I2,t,x,loop,xloop,dx);
+    [data,t,p,m,n,h,q] = HHsim(Diameter,I1,I2,t,x,loop,dt,xloop,dx);
+%     Mdataholder{1,i}=m;
+%     Ndataholder{1,i}=n;
+%     Hdataholder{1,i}=h;
     
 %%  Plots of membrane potential for various input diameters   
     figure
-    for n = 2:2:xloop-1
+    for k = 2:2:xloop-1
         hold on
-        if n == p 
-            plot(t,data(n,:)+(n*50),'r');
+        if k == p 
+            plot(t,data(k,:)+(k*50),'r');
         else
-            plot(t,data(n,:)+(n*50),'b');
+            plot(t,data(k,:)+(k*50),'b');
         end  
     end
 	xlabel('Time (msec)');
-	ylabel('Membrane Potential (mV)');
 	label=strcat('Action potential propagation with a high frequency blockade');
 	title(label);
+    
+    figure
+    subplot(2,1,1)
+        r = 1:25000;        % limit figure time to first 25msec
+        plot(t(1,r),m(p,r),t(1,r),n(p,r),t(1,r),h(p,r));
+        xlabel('Time (msec)');
+        ylabel('Magnitude of gating variables');
+        title('Gating variables at high frequency stimulus');  
+        legend('m','n', 'h'); 
+    
+    subplot(2,1,2)
+        r = 1:25000;        % limit figure time to first 25msec
+        plot(t(1,r),m(q,r),t(1,r),n(q,r),t(1,r),h(q,r));
+        xlabel('Time (msec)');
+        ylabel('Magnitude of gating variables');
+        title('Gating variables at low frequency stimulus');  
+        legend('m','n', 'h'); 
 end
 
 %%	Creating simulation timeframe
@@ -60,9 +79,8 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,p] = HHsim(Diameter,defI1,defI2,t,x,loop,xloop,dx)    
+function [v,t,p,m,n,h,q] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
-    dt = 0.001;         % time steps of simulation
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
@@ -86,9 +104,9 @@ function [v,t,p] = HHsim(Diameter,defI1,defI2,t,x,loop,xloop,dx)
     v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
-	m = zeros(xloop,loop+1);        % Gating variable m
-	h = zeros(xloop,loop+1);        % Gating variable h
-	n = zeros(xloop,loop+1);        % Gating variable n
+	m = zeros(xloop+1,loop+1);        % Gating variable m
+	h = zeros(xloop+1,loop+1);        % Gating variable h
+	n = zeros(xloop+1,loop+1);        % Gating variable n
     dm = zeros(xloop,loop+1);       % Change in Gating variable m
 	dh = zeros(xloop,loop+1);       % Change in Gating variable h
 	dn = zeros(xloop,loop+1);       % Change in Gating variable n
@@ -101,11 +119,11 @@ function [v,t,p] = HHsim(Diameter,defI1,defI2,t,x,loop,xloop,dx)
     betaH = zeros(xloop,loop+1);    % Gating variable rate constant 
    
 %%	Ispan is the applied current vector to hold all instances of the external 
-	n = xloop/4;
+	q = xloop/4;
     p = xloop/2;
-    freq1 = 4; 
-	freq2 = 210; 
-    Ispan(n,:) = defI1*square(2*pi*freq1*(10^(-3))*t);        % Low frequency stimulus to be blocked
+    freq1 = 40;      
+	freq2 = 2100;    
+    Ispan(q,:) = defI1*square(2*pi*freq1*(10^(-3))*t);        % Low frequency stimulus to be blocked
     Ispan(p,:) = defI2*sin(2*pi*freq2*(10^(-3))*t);           % High frequency to create blockade
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables

@@ -20,15 +20,15 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
 %%	Simulation timing variables
     t = 0;
     loop = 0;
-    dt = 0.01;
-    tspan = 800;
+    dt = 0.001;     % time steps for simulation
+    tspan = 50;     % total simulation time (change tspan = 100 for Question 4.6 simulation) 
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
     x = 0;
     xloop = 0;
-    dx = 0.05;
-    xspan = 5;
+    dx = 0.05;      % spatial steps
+    xspan = 5;      % total fibre length
 	[x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
@@ -36,7 +36,7 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
 %%  Running through the various input diameters 
     for i=1:length(Diameter)
         Diameter1 = Diameter(i);
-        [data,t] = HHsim(Diameter1,I,Idur,t,x,loop,xloop,dx);
+        [data,t,p] = HHsim(Diameter1,I,Idur,t,x,loop,dt,xloop,dx);
         dataholder{1,i} = data;
     end
     
@@ -49,9 +49,18 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
             hold on
         end
         xlabel('Time (msec)');
-        ylabel('Membrane Potential (mV)');
         label=strcat('Action potential propagation for fibre of diameter ',{' '},num2str(Diameter(i)),'cm');
         title(label);
+        
+        if Idur == 2
+            figure
+            x = dataholder{1,i};
+            plot(t,x(p,:));
+            xlabel('Time (msec)');
+            ylabel('Membrane Potential (mV)');
+            label=strcat('Membrane potential for fibre under maximum firing stimulus at stimulus site');
+            title(label); 
+        end
     end
 end
 
@@ -68,9 +77,8 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t] = HHsim(defDiameter,defI,Idur,t,x,loop,xloop,dx)    
+function [v,t,p] = HHsim(defDiameter,defI,Idur,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;              % environmental temperature (in deg Celsius)
-    dt = 0.001;                 % time steps for simulation
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)
