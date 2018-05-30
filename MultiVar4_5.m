@@ -20,7 +20,7 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
     t = 0;
     loop = 0;
     dt = 0.001;     % time steps for simulation
-    tspan = 50;     % total simulation time    
+    tspan = 25;     % total simulation time    
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
@@ -37,7 +37,7 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
     
 %%  Plots of membrane potential for various input diameters   
 	figure
-    for n = 2:1:xloop-1
+    for n = 2:2:xloop-1
         plot(t,data(n,:)+(n*15),'b');
         hold on
     end

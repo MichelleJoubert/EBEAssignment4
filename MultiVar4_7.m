@@ -44,8 +44,9 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %%  Plots of membrane potential for various input diameters   
     for i=1:length(Diameter)
         figure
+        subplot(2,1,1)
         x = dataholder{1,i};
-        for k = 2:2:xloop-1
+        for k = 2:1:xloop-1
             plot(t,x(k,:)+(k*15),'b');
             hold on
         end
@@ -59,7 +60,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
         end
         title(label);   
         
-        figure
+        subplot(2,1,2)
         yyaxis left
         x = dataholder{1,i};
         plot(t,x(p,:));
@@ -107,7 +108,7 @@ end
 %%  Hodgkin-Huxley model
 function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
-    freq = 135;         % Frequency for sine and square waves (possibly only 125 or 130)
+    freq = 120;         % Frequency for sine and square waves
     
 %%	Constants and intial values for squid giant axon  
     gNa = 120;                  % Conductance of sodium channels (in m.mho/cm^2)

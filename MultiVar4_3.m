@@ -15,13 +15,13 @@ function [Done] = MultiVar4_3(Distance,I)
 %   
 %   Example:
 %   MultiVar4_3([0.05,0.075,0.1],-5) for cathodic stimulation (for Question 4.4)
-%   MultiVar4_3([0.06,0.07,0.08],3) for anodic stimulation (for Question 4.3)
+%   MultiVar4_3([0.06,0.08,0.1],3) for anodic stimulation (for Question 4.3)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
     dt = 0.001;     % time steps for simulation
-    tspan = 50;     % total simulation time         
+    tspan = 25;     % total simulation time         
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
@@ -57,6 +57,7 @@ function [Done] = MultiVar4_3(Distance,I)
         k = fholder{1,i};
         plot(x,k(:,3500));
         xlabel('Fibre length (cm)');
+        ylabel('Activating function (mV)');
         label=strcat('Activation function with electrode a distance of ',{' '},num2str(Distance(i)),'cm from axon');
         title(label);
     end

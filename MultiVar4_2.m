@@ -44,6 +44,7 @@ function [Done] = MultiVar4_2(Diameter,I,sType)
         end   
     end
 	xlabel('Time (msec)');
+    ylim([0 2200]);
 	if sType == 1
         label=strcat('Action potential propagation across an inhibitory synapse');
 	elseif sType == 2

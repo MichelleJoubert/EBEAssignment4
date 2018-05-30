@@ -24,15 +24,12 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
     xloop = 0;
     dx = 0.05;      % spatial steps
     xspan = 5;      % total fibre length
-	[x,xloop] = FindX(xspan,dx);
+    [x,xloop] = FindX(xspan,dx);
 
 	Done = 'Done';
     
 %%  Running through the various input diameters 
     [data,t,p,m,n,h,q] = HHsim(Diameter,I1,I2,t,x,loop,dt,xloop,dx);
-%     Mdataholder{1,i}=m;
-%     Ndataholder{1,i}=n;
-%     Hdataholder{1,i}=h;
     
 %%  Plots of membrane potential for various input diameters   
     figure
@@ -104,9 +101,9 @@ function [v,t,p,m,n,h,q] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)
     v = zeros(xloop+1,loop+1);      % Normalised membrane potential
     Im = zeros(xloop,loop+1);       % Transmembrane current
     Iion = zeros(xloop,loop+1);     % Ionic currents
-	m = zeros(xloop+1,loop+1);        % Gating variable m
-	h = zeros(xloop+1,loop+1);        % Gating variable h
-	n = zeros(xloop+1,loop+1);        % Gating variable n
+	m = zeros(xloop+1,loop+1);      % Gating variable m
+	h = zeros(xloop+1,loop+1);      % Gating variable h
+	n = zeros(xloop+1,loop+1);      % Gating variable n
     dm = zeros(xloop,loop+1);       % Change in Gating variable m
 	dh = zeros(xloop,loop+1);       % Change in Gating variable h
 	dn = zeros(xloop,loop+1);       % Change in Gating variable n
