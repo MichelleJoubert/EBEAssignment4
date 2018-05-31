@@ -148,10 +148,11 @@ function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,dt,xloop
    
 %%	Ispan is the applied current vector to hold all instances of the external   
     p = xloop/2;
+    fs = 1000;              % adjusting sampling frequency by 1000 samples per second (taking into account dt, that gives fs of 1,000,000 per second)
     if defPType == 1        % sinusoidal stimulus
-        Ispan(p,:) = defI*sin(2*pi*freq*(10^(-3))*t);
+        Ispan(p,:) = defI*sin(2*pi*freq*(1/fs)*t);
     elseif defPType == 2    % square periodic pulsatile stimulus  
-        Ispan(p,:) = defI*((square(2*pi*freq*(10^(-3))*t))+1);
+        Ispan(p,:) = defI*((square(2*pi*freq*(1/fs)*t))+1);
     elseif defPType == 3	% ramp function
         unitstep = t>=0;
         ramp = t.*unitstep;
