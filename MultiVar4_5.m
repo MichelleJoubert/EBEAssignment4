@@ -15,12 +15,13 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 %   Example:
 %   MultiVar4_5(0.07,0.07,0.5) for symmetric bipolar stimulation (for Question 4.5)
 %   MultiVar4_5(0.07,0.09,0.5) for asymetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.07,0.07,0.5) for one way bipolar stimulation (for Question 4.5)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
     dt = 0.001;     % time steps for simulation
-    tspan = 25;     % total simulation time    
+    tspan = 25;     % total simulation time    % for one way bipolar tspan = 18
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
@@ -115,7 +116,7 @@ function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,dt,xloop,dx)
 
 %%	Ispan is the applied current vector to hold all instances of the external 
     p = xloop/2;
-    Ispan2(p+1:p+11,3000:3500) = +defI;
+    Ispan2(p+1:p+11,3000:3500) = +defI;     % for one way firing use +Idef + 1.5; 
     Ispan1(p-11:p-1,3000:3500) = -defI;
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables

@@ -9,19 +9,21 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
 %   Diameter is the fibre diameter (in cm). This variable is a list of
 %   values to allow for investigation of multiple diameters at once.
 %   I is the applied current or external stimulation (in µA)
-%   Idur is the duration of stimulation application (in msec)
+%   Idur is the duration of stimulation application (in msec) or the
+%   stimulus duration type
 %
 %   Example:
 %   MultiVar4_1([0.01],0.5,1) for single pulse
 %   MultiVar4_1([0.02,0.01,0.005,0.002],0.5,1) for single pulse for multiple
 %   fibre diameters (for Question 4.1)
 %   MultiVar4_1([0.01],0.5,2) for constant pulse (for Question 4.6)
+%   MultiVar4_1([0.01],0.5,3) for low frequency pulse (for Question 4.6)
 %
 %%	Simulation timing variables
     t = 0;
     loop = 0;
     dt = 0.001;     % time steps for simulation
-    tspan = 50;     % total simulation time (change tspan = 100 for Question 4.6 simulation) 
+    tspan = 50;     % total simulation time (change tspan = 100 for Question 4.6 simulation and tspan = 50 for Question 4.1) 
     [t,loop] = FindT(tspan,dt);
     
 %%	Simulation spatial variables
@@ -36,7 +38,7 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
 %%  Running through the various input diameters 
     for i=1:length(Diameter)
         Diameter1 = Diameter(i);
-        [data,t,p] = HHsim(Diameter1,I,Idur,t,x,loop,dt,xloop,dx);
+        [data,t,p,Ispan] = HHsim(Diameter1,I,Idur,t,x,loop,dt,xloop,dx);
         dataholder{1,i} = data;
     end
     
@@ -52,13 +54,21 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
         label=strcat('Action potential propagation for fibre of diameter ',{' '},num2str(Diameter(i)),'cm');
         title(label);
         
-        if Idur == 2
+        if Idur == 2 || 3
             figure
+            yyaxis left
             x = dataholder{1,i};
             plot(t,x(p,:));
             xlabel('Time (msec)');
             ylabel('Membrane Potential (mV)');
-            label=strcat('Membrane potential for fibre under maximum firing stimulus at stimulus site');
+
+            yyaxis right
+            plot(t,Ispan(p,:));
+            ylabel('Stimulus (µA)');
+            maxIspan = max(Ispan(:));
+            minIspan = min(Ispan(:));
+            ylim([(minIspan-0.01) (maxIspan+0.01)]);
+            label=strcat('Applied current and membrane response for maximum firing rate of fibre');
             title(label); 
         end
     end
@@ -77,7 +87,7 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,p] = HHsim(defDiameter,defI,Idur,t,x,loop,dt,xloop,dx)    
+function [v,t,p,Ispan] = HHsim(defDiameter,defI,Idur,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;              % environmental temperature (in deg Celsius)
     
 %%	Constants and intial values for squid giant axon  
@@ -122,6 +132,10 @@ function [v,t,p] = HHsim(defDiameter,defI,Idur,t,x,loop,dt,xloop,dx)
         Ispan(p,3000:4000) = defI;
     elseif Idur == 2
         Ispan(p,:) = defI;
+	elseif Idur == 3
+        fs = 1000;  
+        freq = 10;  
+        Ispan(p,:) = defI*sin(2*pi*freq*(1/fs)*t);  
     end
 
 %%	Phi is the temperature adjusting factor to be applied to the gating variables

@@ -146,29 +146,27 @@ function [v,t,synapsePos] = HHsim(defDiameter,defI,defsType,t,x,loop,dt,xloop,dx
                 tau = 5;                % Time constant for general synapses (in msec) (5msec)
                 gSyn(s,i) = gSynMax*((t(1,i)-t0)/tau)*exp((t0-t(1,i))/tau);
                 Isynapse(s,i) = gSyn(s,i)*(v(s,i) - Esyn);    
-            end
-%                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
-%                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
-%                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
-% 
-%                 V(s,i+1) = V(s,i) + dt*(- Isynapse(s,i))/Cm;
-%                 v(s,i+1) = v(s,i) + dt*(- Isynapse(s,i))/Cm; 
-%                 n(s,i+1) = n(s,i) + dn(s,i);
-%                 m(s,i+1) = m(s,i) + dm(s,i);
-%                 h(s,i+1) = h(s,i) + dh(s,i);
-%             else
-                Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
-                Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+                
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
 
-                V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;
-                v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm; 
-                n(s,i+1) = n(s,i) + dn(s,i);
-                m(s,i+1) = m(s,i) + dm(s,i);
-                h(s,i+1) = h(s,i) + dh(s,i);
-%             end
+                V(s,i+1) = V(s,i) + dt*(- Isynapse(s,i))/Cm;
+            else
+                
+            end
+
+            Iion(s,i) = gNa*(m(s,i)^3)*h(s,i)*(v(s,i)-vNa) + gK*(n(s,i)^4)*(v(s,i)-vK) + gL*(v(s,i)-vL);
+            Im(s,i) = (defDiameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i)) + (Ispan(s,i)/(pi*defDiameter*L));
+            dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
+            dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
+            dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
+           
+            V(s,i+1) = V(s,i) + dt*(Im(s,i) - Iion(s,i) - Isynapse(s,i))/Cm;
+            v(s,i+1) = v(s,i) + dt*(Im(s,i) - Iion(s,i))/Cm; 
+            n(s,i+1) = n(s,i) + dn(s,i);
+            m(s,i+1) = m(s,i) + dm(s,i);
+            h(s,i+1) = h(s,i) + dh(s,i);
         end
     end
 end
