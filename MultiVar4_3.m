@@ -14,8 +14,8 @@ function [Done] = MultiVar4_3(Distance,I)
 %   I is the applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_3([0.05,0.075,0.1],-5) for cathodic stimulation (for Question 4.4)
-%   MultiVar4_3([0.06,0.08,0.1],3) for anodic stimulation (for Question 4.3)
+%   MultiVar4_3([0.05,0.075,0.1],-0.5) for cathodic stimulation (for Question 4.4)
+%   MultiVar4_3([0.06,0.08,0.1],0.5) for anodic stimulation (for Question 4.3)
 %
 %%	Simulation timing variables
     t = 0;
@@ -165,7 +165,7 @@ function [v,t,f,x] = HHsim(z,defI,t,x,loop,dt,xloop,dx)
                 v(s,i+1) = v(s,i) + dt*(Im(s,i) + f(s,i) - Iion(s,i))/Cm;
             else
                 Im(s,i) = (Diameter/(4*ri*dx*L))*(v(s-1,i)-2*v(s,i)+v(s+1,i));
-                f(s,i) = ((re*Ispan(s,i))/(4*pi))*(((xe(s,i)^2)+(z^2))^(-5/2))*(2*(xe(s,i)^2)-(z^2));
+                f(s,i) = (Diameter/(4*ri*dx*L))*((re*Ispan(s,i))/(4*pi))*(((xe(s,i)^2)+(z^2))^(-5/2))*(2*(xe(s,i)^2)-(z^2));
                 dn(s,i) = phi*dt*(alphaN(s,i)*(1-n(s,i)) - betaN(s,i)*n(s,i));
                 dm(s,i) = phi*dt*(alphaM(s,i)*(1-m(s,i)) - betaM(s,i)*m(s,i));
                 dh(s,i) = phi*dt*(alphaH(s,i)*(1-h(s,i)) - betaH(s,i)*h(s,i));
