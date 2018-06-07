@@ -58,12 +58,12 @@ function [Done] = MultiVar4_1(Diameter,I,Idur)
             figure
             yyaxis left
             x = dataholder{1,i};
-            plot(t,x(p,:));
+            plot(t,x(p,:),'LineWidth',2);
             xlabel('Time (msec)');
             ylabel('Membrane Potential (mV)');
 
             yyaxis right
-            plot(t,Ispan(p,:));
+            plot(t,Ispan(p,:),'LineWidth',2);
             ylabel('Stimulus (µA)');
             maxIspan = max(Ispan(:));
             minIspan = min(Ispan(:));

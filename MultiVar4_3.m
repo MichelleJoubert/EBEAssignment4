@@ -12,10 +12,19 @@ function [Done] = MultiVar4_3(Distance,I)
 %   variable is a list of values to allow for investigation of multiple 
 %   distances at once.
 %   I is the applied current or external stimulation (in µA)
+%   The default simulation values for anodic stimulation are: z = 0.08cm, I = 0.5µA, Idur = 1msec
+%   The default simulation values for cathodic stimulation are: z = 0.075cm, I = -0.5µA, Idur = 1msec
 %   
 %   Example:
-%   MultiVar4_3([0.05,0.075,0.1],-0.5) for cathodic stimulation (for Question 4.4)
-%   MultiVar4_3([0.06,0.08,0.1],0.5) for anodic stimulation (for Question 4.3)
+%   ANODIC
+%   MultiVar4_3([0.06,0.08,0.1],0.5) for anodic stimulation with differing electrode distances z (for Question 4.3)
+%   MultiVar4_3([0.08],0.25) and MultiVar4_3([0.08],0.75) for anodic stimulation with differing current amplitudes I (for Question 4.3)
+%   MultiVar4_3([0.08],0.5) for anodic stimulation with differing current application durations Idur with changes to duration made in code (for Question 4.3)
+%   
+%   CATHODIC
+%   MultiVar4_3([0.05,0.075,0.1],-0.5) for cathodic stimulation with differing electrode distances z (for Question 4.4)
+%   MultiVar4_3([0.075],-0.25) and MultiVar4_3([0.075],-0.75) for cathodic stimulation with differing current amplitudes I (for Question 4.4)
+%   MultiVar4_3([0.075],-0.5) for cathodic stimulation with differing current application durations Idur with changes to duration made in code (for Question 4.4)
 %
 %%	Simulation timing variables
     t = 0;
@@ -122,7 +131,9 @@ function [v,t,f,x] = HHsim(z,defI,t,x,loop,dt,xloop,dx)
 %%	Ispan is the applied current vector to hold all instances of the external  
     q = xloop/6;
     p = xloop/2;
-    Ispan(p-q:p+q,3000:4000) = defI;
+    Ispan(p-q:p+q,3000:4000) = defI;    % current application duration of 1msec (DEFAULT)
+%     Ispan(p-q:p+q,3000:8000) = defI;    % current application duration of 5msec
+%     Ispan(p-q:p+q,3000:13000) = defI;   % current application duration of 10msec
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);

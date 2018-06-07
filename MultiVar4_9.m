@@ -9,7 +9,7 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
 %   I2 is the high frequency applied current or external stimulation (in µA)
 %   
 %   Example:
-%   MultiVar4_9(0.012,0.1,10) for working high frequency blockade (for
+%   MultiVar4_9(0.012,1,10) for working high frequency blockade (for
 %   Question 4.9)
 %
 %%	Simulation timing variables
@@ -29,7 +29,7 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
 	Done = 'Done';
     
 %%  Running through the various input diameters 
-    [data,t,p,m,n,h,q] = HHsim(Diameter,I1,I2,t,x,loop,dt,xloop,dx);
+    [data,t,p,m,n,h] = HHsim(Diameter,I1,I2,t,x,loop,dt,xloop,dx);
     
 %%  Plots of membrane potential for various input diameters   
     figure
@@ -48,7 +48,7 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
     figure
     subplot(2,1,1)
         r = 1:25000;        % limit figure time to first 25msec
-        plot(t(1,r),m(p,r),t(1,r),n(p,r),t(1,r),h(p,r));
+        plot(t(1,r),m(p,r),t(1,r),n(p,r),t(1,r),h(p,r),'LineWidth',2);
         xlabel('Time (msec)');
         ylabel('Magnitude of gating variables');
         title('Gating variables at high frequency stimulus');  
@@ -56,7 +56,7 @@ function [Done] = MultiVar4_9(Diameter,I1,I2)
     
     subplot(2,1,2)
         r = 1:25000;        % limit figure time to first 25msec
-        plot(t(1,r),m(q,r),t(1,r),n(q,r),t(1,r),h(q,r));
+        plot(t(1,r),m(2,r),t(1,r),n(2,r),t(1,r),h(2,r),'LineWidth',2);
         xlabel('Time (msec)');
         ylabel('Magnitude of gating variables');
         title('Gating variables at low frequency stimulus');  
@@ -76,7 +76,7 @@ function [x,xloop] = FindX(xspan,dx)
 end
 
 %%  Hodgkin-Huxley model
-function [v,t,p,m,n,h,q] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)    
+function [v,t,p,m,n,h] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)    
     defTemp = 6.3;      % environmental temperature (in deg Celsius)
     
 %%	Constants and intial values for squid giant axon  
@@ -116,11 +116,10 @@ function [v,t,p,m,n,h,q] = HHsim(Diameter,defI1,defI2,t,x,loop,dt,xloop,dx)
     betaH = zeros(xloop,loop+1);    % Gating variable rate constant 
    
 %%	Ispan is the applied current vector to hold all instances of the external 
-	q = xloop/4;
     p = xloop/2;
     freq1 = 40;      
 	freq2 = 2100;    
-    Ispan(q,:) = defI1*square(2*pi*freq1*(10^(-3))*t);        % Low frequency stimulus to be blocked
+    Ispan(2,:) = defI1*square(2*pi*freq1*(10^(-3))*t);        % Low frequency stimulus to be blocked
     Ispan(p,:) = defI2*sin(2*pi*freq2*(10^(-3))*t);           % High frequency to create blockade
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables

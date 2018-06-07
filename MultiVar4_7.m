@@ -16,7 +16,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
 %   Example:
 %   MultiVar4_7([0.01],0.5,1) for sine wave (for Question 4.7 i)
 %   MultiVar4_7([0.01],0.5,2) for square wave (for Question 4.7 ii)
-%   MultiVar4_7([0.01],0.25,3) for ramp function (for Question 4.8)
+%   MultiVar4_7([0.01],0.3,3) for ramp function (for Question 4.8)
 %
 %%	Simulation timing variables
     t = 0;
@@ -63,12 +63,12 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
         subplot(2,1,2)
         yyaxis left
         x = dataholder{1,i};
-        plot(t,x(p,:));
+        plot(t,x(p,:),'LineWidth',2);
         xlabel('Time (msec)');
         ylabel('Membrane Potential (mV)');
             
         yyaxis right
-        plot(t,Ispan(p,:));
+        plot(t,Ispan(p,:),'LineWidth',2);
         ylabel('Stimulus (µA)');
         maxIspan = max(Ispan(:));
         minIspan = min(Ispan(:));
@@ -84,7 +84,7 @@ function [Done] = MultiVar4_7(Diameter,I,PType)
         
         if PType == 3
             figure
-            plot(t,m(p,:),t,n(p,:),t,h(p,:));
+            plot(t,m(p,:),t,n(p,:),t,h(p,:),'LineWidth',2);
             xlabel('Time (msec)');
             ylabel('Magnitude of gating variables');
             title('Gating variables at stimulus site for ramp function stimulation');  
@@ -157,6 +157,8 @@ function [v,t,m,h,n,Ispan,p] = HHsim(defDiameter,defI,defPType,t,x,loop,dt,xloop
         unitstep = t>=0;
         ramp = t.*unitstep;
         Ispan(p,:) = defI*0.01*ramp;
+%         Ispan(p,3000:4000) = defI;    % use to demonstate the 0.3µA is
+%         sufficient to elicit AP under normal conditions
     end
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
