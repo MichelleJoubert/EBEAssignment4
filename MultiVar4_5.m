@@ -11,9 +11,12 @@ function [Done] = MultiVar4_5(Distance1,Distance2,I)
 %   Distance1 is the first electrode's distance away from the axon (in cm).
 %   Distance2 is the second electrode's distance away from the axon (in cm).
 %   I is the applied current or external stimulation (in µA)
+%   The default simulation values for bipolar stimulation are: z = 0.075cm, I = -0.5µA, Idur = 1msec
 %   
 %   Example:
-%   MultiVar4_5(0.07,0.07,0.5) for symmetric bipolar stimulation (for Question 4.5)
+%   MultiVar4_5(0.07,0.07,0.5) and MultiVar4_5(0.08,0.08,0.5) and MultiVar4_5(0.06,0.06,0.5) for symmetric bipolar stimulation with differing electrode distances z (for Question 4.5)
+%   MultiVar4_5(0.07,0.07,0.5) and MultiVar4_5(0.07,0.07,0.25) and MultiVar4_5(0.07,0.07,0.75) for symmetric bipolar stimulation with differing current amplitudes I (for Question 4.5)
+%   MultiVar4_5(0.07,0.07,0.5) for symmetric bipolar stimulation with differing current application durations Idur with changes to duration made in code (for Question 4.5)
 %   MultiVar4_5(0.07,0.09,0.5) for asymetric bipolar stimulation (for Question 4.5)
 %   MultiVar4_5(0.07,0.07,0.5) for one way bipolar stimulation (for Question 4.5)
 %
@@ -117,7 +120,13 @@ function [v,t,f,x] = HHsim(z1,z2,defI,t,x,loop,dt,xloop,dx)
 %%	Ispan is the applied current vector to hold all instances of the external 
     p = xloop/2;
     Ispan2(p+1:p+11,3000:3500) = +defI;     % for one way firing use +Idef + 1.5; 
-    Ispan1(p-11:p-1,3000:3500) = -defI;
+    Ispan1(p-11:p-1,3000:3500) = -defI;     % current application duration of 0.5msec (DEFAULT)
+    
+%     Ispan2(p+1:p+11,3000:4000) = +defI;     % current application duration of 1msec
+%     Ispan1(p-11:p-1,3000:4000) = -defI;     
+    
+%     Ispan2(p+1:p+11,3000:5000) = +defI;     % current application duration of 2msec
+%     Ispan1(p-11:p-1,3000:5000) = -defI;     
     
 %%	Phi is the temperature adjusting factor to be applied to the gating variables
     phi = 3^((0.1*defTemp)-0.63);
